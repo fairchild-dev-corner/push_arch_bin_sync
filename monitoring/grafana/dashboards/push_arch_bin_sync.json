@@ -1,0 +1,246 @@
+{
+  "title": "push_arch_bin_sync",
+  "uid": "push-arch-bin-sync",
+  "schemaVersion": 39,
+  "version": 1,
+  "editable": true,
+  "timezone": "browser",
+  "refresh": "10s",
+  "time": { "from": "now-6h", "to": "now" },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Daemon Up",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus-ds" },
+      "targets": [
+        { "expr": "up{job=\"push_arch_bin_sync\"}", "legendFormat": "up", "refId": "A" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            { "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "UP", "color": "green" } } }
+          ],
+          "thresholds": { "mode": "absolute", "steps": [{ "value": null, "color": "red" }, { "value": 1, "color": "green" }] }
+        }
+      },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "textMode": "value_and_name" }
+    },
+    {
+      "id": 2,
+      "title": "Time Since Last Successful Sync",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus-ds" },
+      "targets": [
+        { "expr": "time() - binlog_sync_last_success_timestamp_seconds", "legendFormat": "seconds since success", "refId": "A" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "value": null, "color": "green" },
+              { "value": 60, "color": "yellow" },
+              { "value": 300, "color": "red" }
+            ]
+          }
+        }
+      },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] } }
+    },
+    {
+      "id": 3,
+      "title": "Time Since Last Check",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus-ds" },
+      "targets": [
+        { "expr": "time() - binlog_sync_last_check_timestamp_seconds", "legendFormat": "seconds since check", "refId": "A" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "value": null, "color": "green" },
+              { "value": 30, "color": "yellow" },
+              { "value": 120, "color": "red" }
+            ]
+          }
+        }
+      },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] } }
+    },
+    {
+      "id": 4,
+      "title": "Total Read Errors",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus-ds" },
+      "targets": [
+        { "expr": "binlog_sync_read_errors_total", "legendFormat": "read errors", "refId": "A" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "red" }
+        }
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "colorMode": "background_solid"
+      }
+    },
+    {
+      "id": 5,
+      "title": "Successful Writes (24h)",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 16, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus-ds" },
+      "targets": [
+        { "expr": "sum(increase(binlog_sync_destination_writes_total{result=\"success\"}[24h]))", "legendFormat": "success", "refId": "A" }
+      ],
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "green" } } },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] } }
+    },
+    {
+      "id": 6,
+      "title": "Failed Writes (24h)",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 20, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus-ds" },
+      "targets": [
+        { "expr": "sum(increase(binlog_sync_destination_writes_total{result=\"failure\"}[24h]))", "legendFormat": "failure", "refId": "A" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": { "mode": "absolute", "steps": [{ "value": null, "color": "green" }, { "value": 1, "color": "red" }] }
+        }
+      },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] } }
+    },
+    {
+      "id": 7,
+      "title": "Destination Writes: Success vs Failure",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "datasource": { "type": "prometheus", "uid": "prometheus-ds" },
+      "targets": [
+        { "expr": "sum by (result) (rate(binlog_sync_destination_writes_total[5m]))", "legendFormat": "{{result}}", "refId": "A" }
+      ],
+      "fieldConfig": {
+        "defaults": { "custom": { "drawStyle": "line", "fillOpacity": 15, "spanNulls": true } },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "success" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "green" } }] },
+          { "matcher": { "id": "byName", "options": "failure" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } }] }
+        ]
+      }
+    },
+    {
+      "id": 8,
+      "title": "Events by Operation",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "datasource": { "type": "prometheus", "uid": "prometheus-ds" },
+      "targets": [
+        { "expr": "sum by (operation) (rate(binlog_sync_events_total[5m]))", "legendFormat": "{{operation}}", "refId": "A" }
+      ],
+      "fieldConfig": {
+        "defaults": { "custom": { "drawStyle": "line", "fillOpacity": 10, "spanNulls": true } }
+      }
+    },
+    {
+      "id": 9,
+      "title": "Events by Table",
+      "type": "timeseries",
+      "gridPos": { "h": 9, "w": 24, "x": 0, "y": 12 },
+      "datasource": { "type": "prometheus", "uid": "prometheus-ds" },
+      "targets": [
+        { "expr": "sum by (table) (rate(binlog_sync_events_total[5m]))", "legendFormat": "{{table}}", "refId": "A" }
+      ],
+      "fieldConfig": {
+        "defaults": { "custom": { "drawStyle": "line", "fillOpacity": 5, "spanNulls": true } }
+      }
+    },
+    {
+      "id": 10,
+      "title": "Live Sync/Error Log",
+      "type": "logs",
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 21 },
+      "datasource": { "type": "loki", "uid": "loki-ds" },
+      "targets": [
+        { "expr": "{job=\"push_arch_bin_sync\", level=~\"sync|error\"}", "refId": "A" }
+      ],
+      "options": {
+        "showTime": true,
+        "showLabels": true,
+        "wrapLogMessage": true,
+        "sortOrder": "Descending",
+        "enableLogDetails": true
+      }
+    },
+    {
+      "id": 11,
+      "title": "Change Feed",
+      "type": "table",
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 31 },
+      "datasource": { "type": "loki", "uid": "loki-ds" },
+      "targets": [
+        { "expr": "{job=\"push_arch_bin_sync\", level=\"event\"} | logfmt", "refId": "A" }
+      ],
+      "transformations": [
+        {
+          "id": "extractFields",
+          "options": {
+            "source": "labels",
+            "format": "json"
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "labels": true,
+              "Line": true,
+              "labelTypes": true,
+              "tsNs": true,
+              "id": true,
+              "job": true,
+              "level": true,
+              "service_name": true
+            },
+            "indexByName": {
+              "Time": 0,
+              "action": 1,
+              "table": 2,
+              "info": 3
+            },
+            "renameByName": {
+              "Time": "TIMESTAMP",
+              "action": "ACTION",
+              "table": "TABLE",
+              "info": "INFO"
+            }
+          }
+        }
+      ],
+      "options": { "showHeader": true },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "ACTION" }, "properties": [
+            { "id": "custom.cellOptions", "value": { "type": "color-text" } },
+            { "id": "mappings", "value": [
+              { "type": "value", "options": { "INSERT": { "color": "green", "index": 0 } } },
+              { "type": "value", "options": { "UPDATE": { "color": "yellow", "index": 1 } } },
+              { "type": "value", "options": { "DELETE": { "color": "red", "index": 2 } } }
+            ] }
+          ] }
+        ]
+      }
+    }
+  ]
+}

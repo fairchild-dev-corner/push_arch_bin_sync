@@ -1,0 +1,8 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'push_arch_bin_sync'
+    static_configs:
+      - targets: ['__METRICS_TARGET__']

@@ -1,0 +1,36 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go build command
+bin/
+
+# Runtime error and sync logs
+err_logs/
+sync_logs/
+transaction_logs/
+
+# Code coverage profiles and other test artifacts
+*.out
+*.coverprofile
+profile.cov
+
+# Go workspace file
+go.work
+go.work.sum
+
+# Environment files (secrets)
+.env
+
+# Generated from monitoring/prometheus/prometheus.yml.template per deployment
+monitoring/prometheus/prometheus.yml
+monitoring/prometheus/data/
+monitoring/logs/
+monitoring/loki/data/
+monitoring/grafana/data/

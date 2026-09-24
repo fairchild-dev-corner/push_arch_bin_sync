@@ -1,0 +1,16 @@
+apiVersion: 1
+
+providers:
+  - name: 'push_arch_bin_sync'
+    orgId: 1
+    folder: ''
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      # Expanded from the GRAFANA_DASHBOARDS_PATH env var at Grafana startup
+      # (Grafana >= 9.1). Set per-deployment in monitoring/.env - see
+      # monitoring/README.md. No need to edit this file per server.
+      path: $__env{GRAFANA_DASHBOARDS_PATH}
+      foldersFromFilesStructure: false
